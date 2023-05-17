@@ -1,0 +1,37 @@
+---
+- hosts: devserver
+  become: yes
+  ignore_errors: yes
+  vars:
+    username: joseph
+    pkg_name: httpd
+    tasks:
+      - name: creating user
+        user:
+          name: "{{ username}}"
+          comment: joseph Admin
+          shell: / bin/bash
+      - name: create file
+        file:
+          path: /tmp/ansible.txt
+          state: touch
+          mode: '0600'
+      - name: create diretory
+          path: /tmp/dir
+          mode: '0777'
+      - name: install apahe
+        yum:
+          name: "{{ pkg_name}}"
+          state: present
+      - name: install finger
+        package:
+          name: "{{ item }}"
+          state: present
+          with_items:
+            - wget
+            - samba
+            - java-8*
+            - finger
+
+
+

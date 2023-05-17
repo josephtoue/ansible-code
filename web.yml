@@ -1,0 +1,43 @@
+---
+hosts: qaserver
+become: yes
+ignore_error: yes
+tasks:
+    - name: Install required packages
+      yum:
+        name:
+          - unzip
+          - wget
+          - httpd
+        state: present
+        update_cache: yes
+
+    - name: Download the static app archive
+      get_url:
+        url: "https://github.com/utrains/static-resume/archive/refs/heads/main.zip"
+        dest: "/tmp/main.zip"
+
+    - name: Extract the app archive
+      unarchive:
+        src: "/tmp/main.zip"
+        dest: "/tmp"
+        remote_src: yes
+
+    - name: Copy app files to web server directory
+      copy:
+        src: "/tmp/static-resume-main/iPortfolio/"
+        dest: "/var/www/html/"
+
+    - name: Start and enable Apache HTTP Server
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Check if the app is accessible in the browser
+      wait_for:
+        host: localhost
+        port: 80
+        state: started
+        delay: 5
+        timeout: 60
